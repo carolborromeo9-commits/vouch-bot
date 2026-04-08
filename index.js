@@ -1,6 +1,9 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 
+// fetch fix for Railway
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
@@ -16,7 +19,7 @@ client.on('interactionCreate', async (interaction) => {
   try {
     const buyer = interaction.user;
 
-    // 🔥 ORDER: proof → item → feedback
+    // ✅ ORDER: proof → item → feedback
     const proof = interaction.options.getAttachment('a_proof', true);
     const item = interaction.options.getString('b_item', true);
     const feedback = interaction.options.getString('c_feedback', true);
@@ -25,7 +28,7 @@ client.on('interactionCreate', async (interaction) => {
     const sellerMention = `<@${process.env.SELLER_ID}>`;
     const avatar = buyer.displayAvatarURL({ size: 1024 });
 
-    // 🔹 Embed 1 (header)
+    // 🔹 HEADER EMBED
     const embed1 = new EmbedBuilder()
       .setAuthor({
         name: buyer.username,
@@ -35,7 +38,7 @@ client.on('interactionCreate', async (interaction) => {
         `<:korizumi:1491450691208609936> ${buyerMention} has vouched ${sellerMention}`
       );
 
-    // 🔹 Embed 2 (details)
+    // 🔹 DETAILS EMBED
     const embed2 = new EmbedBuilder()
       .setDescription(
         `<:pearl:1485552109410713611> **item:** ${item}\n\n` +
@@ -43,7 +46,7 @@ client.on('interactionCreate', async (interaction) => {
       )
       .setImage(proof.url);
 
-    // 🔥 Send to webhook (Server 2)
+    // 🔥 SEND TO WEBHOOK
     await fetch(process.env.WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -53,28 +56,21 @@ client.on('interactionCreate', async (interaction) => {
       })
     });
 
-    // 🔹 Ephemeral reply
+    // ✅ YOUR CUSTOM EPHEMERAL MESSAGE
     await interaction.reply({
       content: `_ _
-_ _ _ _   **warranty activated !**_ _
+            _ _ _ _   **warranty activated !**_ _
 
--# _ _               thank ü saur much for your
+-# _ _               thank  ü  saur  much  for your
 -# _ _               purchase feel free to create a
--# _ _               report tix anytime for app
--# _ _               updates or lil concerns <a:korila:1482440638694686811>
+-# _ _               report    tix    anytime  for app
+-# _ _                 updates  or  lil concerns <a:korila:1482440638694686811> 
 _ _`,
       ephemeral: true
     });
 
   } catch (err) {
     console.error(err);
-
-    if (!interaction.replied) {
-      await interaction.reply({
-        content: 'Error sending vouch.',
-        ephemeral: true
-      });
-    }
   }
 });
 
