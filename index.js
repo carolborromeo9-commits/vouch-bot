@@ -16,14 +16,16 @@ client.on('interactionCreate', async (interaction) => {
   try {
     const buyer = interaction.user;
 
-    const item = interaction.options.getString('a_item', true);
-    const feedback = interaction.options.getString('b_feedback', true);
-    const proof = interaction.options.getAttachment('c_proof', true);
+    // 🔥 ORDER: proof → item → feedback
+    const proof = interaction.options.getAttachment('a_proof', true);
+    const item = interaction.options.getString('b_item', true);
+    const feedback = interaction.options.getString('c_feedback', true);
 
     const buyerMention = `<@${buyer.id}>`;
     const sellerMention = `<@${process.env.SELLER_ID}>`;
     const avatar = buyer.displayAvatarURL({ size: 1024 });
 
+    // 🔹 Embed 1 (header)
     const embed1 = new EmbedBuilder()
       .setAuthor({
         name: buyer.username,
@@ -33,6 +35,7 @@ client.on('interactionCreate', async (interaction) => {
         `<:korizumi:1491450691208609936> ${buyerMention} has vouched ${sellerMention}`
       );
 
+    // 🔹 Embed 2 (details)
     const embed2 = new EmbedBuilder()
       .setDescription(
         `<:pearl:1485552109410713611> **item:** ${item}\n\n` +
@@ -40,15 +43,17 @@ client.on('interactionCreate', async (interaction) => {
       )
       .setImage(proof.url);
 
+    // 🔥 Send to webhook (Server 2)
     await fetch(process.env.WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: 'cia',
+        username: 'cıα',
         embeds: [embed1.toJSON(), embed2.toJSON()]
       })
     });
 
+    // 🔹 Ephemeral reply
     await interaction.reply({
       content: `_ _
 _ _ _ _   **warranty activated !**_ _
@@ -63,6 +68,13 @@ _ _`,
 
   } catch (err) {
     console.error(err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: 'Error sending vouch.',
+        ephemeral: true
+      });
+    }
   }
 });
 
