@@ -1,20 +1,42 @@
 require('dotenv').config();
-const { REST, Routes } = require('discord.js');
+const { REST, Routes, SlashCommandBuilder } = require('discord.js');
+
+const commands = [
+  new SlashCommandBuilder()
+    .setName('vouch')
+    .setDescription('Send a vouch')
+    .addAttachmentOption(option =>
+      option.setName('proof').setDescription('Proof').setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName('item').setDescription('Item').setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName('feedback').setDescription('Feedback').setRequired(true)
+    )
+    .toJSON()
+];
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
 (async () => {
   try {
-    // ❌ DELETE ALL COMMANDS
+    // delete all GLOBAL commands
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: [] }
+    );
+
+    // replace GUILD commands with only this one
     await rest.put(
       Routes.applicationGuildCommands(
         process.env.CLIENT_ID,
         process.env.GUILD_ID
       ),
-      { body: [] }
+      { body: commands }
     );
 
-    console.log('All commands deleted!');
+    console.log('Global commands cleared, guild command registered.');
   } catch (error) {
     console.error(error);
   }
