@@ -5,16 +5,16 @@ const commands = [
   new SlashCommandBuilder()
     .setName('vouch')
     .setDescription('Send a vouch')
-    .addAttachmentOption(option =>
+    .addAttachmentOption((option) =>
       option.setName('proof').setDescription('Proof').setRequired(true)
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option.setName('item').setDescription('Item').setRequired(true)
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option.setName('feedback').setDescription('Feedback').setRequired(true)
     )
-    .toJSON()
+    .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
